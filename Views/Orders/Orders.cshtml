@@ -1,0 +1,59 @@
+﻿@using HW6.Models
+@model  IPagedList<HW6.Models.OrderVM>
+<h2>Orders</h2>
+@using (Html.BeginForm("SearchOrders", "Home", FormMethod.Post))
+{
+    <form>
+        <div class="row">
+            <div class="col-lg-3">
+                <input type="date" name="search" id="search" class="form-control" />
+            </div>
+            <div class="col-1">
+                <input type="submit" value="Search" class="form-control btn btn-info" />
+            </div>
+        </div>
+    </form>
+}
+
+@using PagedList;
+@using PagedList.Mvc;
+
+@for (int i = 0; i < Model.Count(); i++)
+{
+    if (Model.Where(p => p.Id == i).Count() > 0)
+    {
+        <h1>Order @Model.Where(p => p.Id == i).FirstOrDefault().Id - @Model.Where(p => p.Id == i).FirstOrDefault().orderdate.Date.ToShortDateString() </h1>
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th width="500">Product Name</th>
+                    <th width="100">List Price</th>
+                    <th width="100"> Quantity</th>
+                    <th width="100">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model.Where(p => p.Id == i).ToList())
+                {
+                    <tr>
+                        <td>@product.Id @product.Product.product_name</td>
+                        <td>@product.price</td>
+                        <td>@product.quantity</td>
+                        <td>@product.Total</td>
+                    </tr>
+                }
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td><strong>Grand Total</strong></td>
+                    <td>@Model.Where(p => p.Id == i).Sum(p => p.Total)</td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+}
+
+@Html.PagedListPager(Model, i => Url.Action("Orders", "Orders", new { i, search = Request.QueryString["search"] }))
+
+

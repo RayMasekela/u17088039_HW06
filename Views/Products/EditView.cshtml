@@ -1,0 +1,41 @@
+﻿<div class="form-group">
+    <label>Id</label>
+    <input type="text" class="form-control" id="id">
+</div>
+
+
+<div class="form-group">
+    <label>Name</label>
+    <input type="text" class="form-control" id="name">
+</div>
+
+<div class="form-group">
+    <label>Catergory</label>
+    <select class="form-control" id="category">
+    </select><br />
+</div>
+
+<div class="form-group">
+    <label>Price</label>
+    <input type="number" class="form-control" id="price">
+</div>
+
+<div class="form-group">
+    <label>Brand:</label>
+    <select id="brand" class="form-control">
+    </select>
+</div>
+
+<div class="form-group">
+    <label>Model</label>
+    <input type="text" class="form-control" id="year">
+</div>
+
+<div class="form-group">    
+    <input type="button" value="Update" class="form-control" onclick="SaveUpdate()">
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

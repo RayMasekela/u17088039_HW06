@@ -1,0 +1,257 @@
+﻿@model IPagedList<HW6.Models.product>
+
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+@using PagedList;
+@using PagedList.Mvc;
+
+
+@using (Html.BeginForm("Index", "Products", FormMethod.Get))
+{
+    <form class="form-inline" role="form">
+
+        <div class="row">
+            <div class="form-group">
+                <input type="text" class="form-control" name="search" id="search" placeholder="Enter Product Name">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-info">Search</button>
+            </div>
+            <div class="form-group">
+                <input type="button" class="btn btn-primary btnCreate" value="Create" style="margin-left: 0px">
+            </div>
+        </div>
+
+    </form>
+}
+<div class="modal fade modal-dialog-centered" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="partialView">
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<table class="table table-striped">
+    <tr>
+        <th>
+            Product name
+        </th>
+        <th>
+            Model Year
+        </th>
+        <th>
+            Price
+        </th>
+        <th>
+            Brand
+        </th>
+        <th>
+            Category
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.product_name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.model_year)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.list_price)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.brand.brand_name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.category.category_name)
+            </td>
+            <td>
+                <button type="button" class="btn btn-primary btn-update" onclick="edit(@item.product_id)" data-id="@item.product_id">Edit</button> |
+                <button type="button" class="btn btn-primary btn-update" onclick="Details(@item.product_id)" data-id="@item.product_id">Details</button> |
+                <button type="button" class="btn btn-primary btn-update" onclick="Delete(@item.product_id)" data-id="@item.product_id">Delete </button>
+            </td>
+        </tr>
+    }
+
+</table>
+
+
+@Html.PagedListPager(Model, i => Url.Action("Index", "Products", new { i}))
+
+
+@section scripts{
+    <script>
+
+        function Delete(myid) {
+            $.get({
+                url: "@Url.Action("DeleteConfirmed", "Products")",
+                method: "GET",
+                data: { id : myid },
+                success: (data) => {
+
+                    location.reload();
+                }
+            });
+
+        }
+
+
+
+
+        function Brands() {
+            $.get({
+                url: "@Url.Action("Brands", "Products")",
+                method: "GET",
+                success: (data) => {
+                    let  brands = JSON.parse(data);
+                    $(brands).each((i, brand) => {
+                        $("#brand").append(`<option value="${brand.brand_id}">${brand.brand_name}</option>`);
+                    });
+                }
+            });
+        }
+
+        function edit(id) {
+            $('#exampleModal').modal('toggle');
+            $('#partialView').load('/Products/EditView');
+            var Id = parseInt(id)
+            $.get({
+                url: "@Url.Action("GetProductId", "Products")",
+                data: {
+                    id: Id,
+                },
+                success: (data, status) => {
+                    let product = JSON.parse(data);
+                    console.log(product)
+                    $('#id').val(product.id)
+                    $('#name').val(product.name);
+                    $("#category").empty();
+                    $("#category").append(`<option value="${product.catergoryId}">${product.catergory}</option>`);
+                    $('#price').val(product.price);
+                    Categories();
+                    $("#brand").empty();
+                    $("#brand").append(`<option value="${product.brandId}">${product.brand}</option>`);
+                    Brands();
+                    $('#year').val(product.model);
+
+                }
+            });
+
+
+        }
+
+
+
+        function SaveUpdate() {
+            console.log('here')
+            $.post({
+                url: "@Url.Action("Edit", "Products")",
+                method: "POST",
+                data: {
+
+                    id: parseInt($('#id').val()),
+                    name: $('#name').val(),
+                    category: parseInt($('#category').val()),
+                    price: parseFloat($('#price').val()),
+                    brand: parseInt($('#brand').val()),
+                    year: parseInt($('#year').val())
+                },
+                success: (data) => {
+                    // Clear
+                    $('#exampleModal').modal('toggle');
+                    location.reload();
+                }
+            })
+          //  location.reload();
+        }
+
+
+         function Categories() {
+            $.get({
+                url: "@Url.Action("Categories", "Products")",
+                method: "GET",
+                success: (data) => {
+                    let categories = JSON.parse(data);
+                    $(categories).each((i, category) => {
+                        $("#category").append(`<option value="${category.category_id}">${category.category_name}</option>`);
+                    });
+                }
+            });
+        }
+
+         function Update() {
+
+            $.post({
+                url: "@Url.Action("Edit", "Products")",
+                method: "POST",
+                data: {
+
+                    id: parseInt($('#id').val()),
+                    name: $('#name').val(),
+                    categoryId: parseInt($('#category').val()),
+                    price: parseFloat($('#price').val()),
+                    brandId: parseInt($('#brand').val()),
+                    year: parseInt($('#model').val())
+                },
+                success: (data, status) => {
+                    console.log(data);
+                    $('#exampleModal').modal('hide');
+
+                    GetProducts();
+
+                }
+            })
+        }
+
+
+        function Details(myid) {
+            $('#exampleModal').modal('toggle');
+            $('#partialView').load('/Products/Details');
+
+             $.get({
+                    url: "@Url.Action("ProductDetails", "Products")",
+                    data: {
+                        id: myid,
+
+                    },
+                 success: (data) => {
+                     let product = JSON.parse(data);
+                     console.log(product)
+                     $('#header').html(product.productname)
+                     $('#name').html(product.productname);
+                     $('#year').html(product.year);
+                     $('#price').html(product.price);
+                     $('#catergory').html(product.productname);
+                     $('#brand').html(product.brand);
+
+                     $(product.stores).each((i, e) => {
+                         $('#stores').append(`<tr><td>${e.storename}</td><td>${e.quantity}</td></tr>`)
+                     })
+                    }
+             });
+        }
+
+    </script>
+
+
+}
